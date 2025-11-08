@@ -77,6 +77,7 @@ Key Entry Points:
 - https://developer.repebble.com/tutorials/watchface-tutorial/part1 - C development start
 - https://developer.repebble.com/guides/events-and-services/buttons - Button handling
 - https://developer.repebble.com/guides/user-interfaces/layers - UI foundations
+- https://github.com/pebble/clay - Clay Phone-side Settings Menu
 
 ## Development Best Practices
 
