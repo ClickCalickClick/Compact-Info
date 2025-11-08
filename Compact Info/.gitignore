@@ -1,0 +1,13 @@
+# Build artifacts
+build/
+
+# Config file with API keys (DO NOT COMMIT)
+src/c/config.h
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

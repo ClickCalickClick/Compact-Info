@@ -1,0 +1,1 @@
+We will use https://weatherapi.com for all weather related API tasks in this application.

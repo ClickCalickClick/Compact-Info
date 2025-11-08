@@ -1,8 +1,10 @@
 {
-  "name": "Compact Info",
+  "name": "compact-info",
   "author": "MakeAwesomeHappen",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
   "dependencies": {},
   "pebble": {
@@ -13,19 +15,81 @@
     "targetPlatforms": [
       "aplite",
       "basalt",
-      "chalk",
       "diorite",
       "emery",
       "flint"
     ],
     "watchapp": {
-      "watchface": false
+      "watchface": true
     },
     "messageKeys": [
-      "dummy"
+      "Temperature",
+      "Condition",
+      "WeatherIcon",
+      "Location",
+      "UseGPS",
+      "ZipCode",
+      "TemperatureUnit",
+      "TimeFormat",
+      "ColorTheme",
+      "InvertColors",
+      "ShowWeather",
+      "ShowBattery",
+      "ShowDate"
     ],
     "resources": {
-      "media": []
+      "media": [
+        {
+          "type": "png",
+          "name": "ICON_SUN",
+          "file": "sun.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_CLOUD",
+          "file": "cloud.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_RAIN",
+          "file": "cloud-rain.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_SNOW",
+          "file": "cloud-snow.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_THUNDER",
+          "file": "cloud-lightning.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_BATTERY_FULL",
+          "file": "battery-full.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_BATTERY_GOOD",
+          "file": "battery-medium.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_BATTERY_LOW",
+          "file": "battery-low.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_BATTERY_WARNING",
+          "file": "battery-warning.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_BATTERY",
+          "file": "battery.png"
+        }
+      ]
     }
   }
 }
