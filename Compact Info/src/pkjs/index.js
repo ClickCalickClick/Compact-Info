@@ -101,7 +101,7 @@ function locationSuccess(pos) {
   console.log('Got location: ' + coords);
   
   var settings = JSON.parse(localStorage.getItem('clay-settings')) || {};
-  var useCelsius = settings.TemperatureUnit || false;
+  var useCelsius = (settings.TemperatureUnit && settings.TemperatureUnit.value) || false;
   
   fetchWeather(coords, useCelsius);
 }
@@ -111,8 +111,8 @@ function locationError(err) {
   
   // Fall back to ZIP code if available
   var settings = JSON.parse(localStorage.getItem('clay-settings')) || {};
-  var zipCode = settings.ZipCode;
-  var useCelsius = settings.TemperatureUnit || false;
+  var zipCode = (settings.ZipCode && settings.ZipCode.value) || '';
+  var useCelsius = (settings.TemperatureUnit && settings.TemperatureUnit.value) || false;
   
   if (zipCode && zipCode.length > 0) {
     fetchWeather(zipCode, useCelsius);
@@ -123,9 +123,9 @@ function locationError(err) {
 
 function getWeather() {
   var settings = JSON.parse(localStorage.getItem('clay-settings')) || {};
-  var useGPS = settings.UseGPS !== false; // Default to true
-  var zipCode = settings.ZipCode || '';
-  var useCelsius = settings.TemperatureUnit || false;
+  var useGPS = (settings.UseGPS && settings.UseGPS.value !== false); // Default to true
+  var zipCode = (settings.ZipCode && settings.ZipCode.value) || '';
+  var useCelsius = (settings.TemperatureUnit && settings.TemperatureUnit.value) || false;
   
   console.log('Getting weather - GPS: ' + useGPS + ', ZIP: ' + zipCode);
   
@@ -175,9 +175,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
   var settings = JSON.parse(e.response);
   console.log('Settings received: ' + JSON.stringify(settings));
   
-  // Convert color theme to integer
+  // Convert color theme to integer (Clay returns {"value": "0x000000"})
   var colorTheme = 0;
-  if (settings.ColorTheme) {
+  if (settings.ColorTheme && settings.ColorTheme.value) {
     var colorMap = {
       '0x000000': 0, // Default/Black
       '0x0000FF': 1, // Blue
@@ -187,21 +187,34 @@ Pebble.addEventListener('webviewclosed', function(e) {
       '0xFF5500': 5, // Orange
       '0x00AAAA': 6  // Teal
     };
-    colorTheme = colorMap[settings.ColorTheme] || 0;
+    colorTheme = colorMap[settings.ColorTheme.value] || 0;
   }
   
   // Send settings to watch
+  // Clay returns objects like {"value": true}, so we need to extract .value
   var dictionary = {
-    'TemperatureUnit': settings.TemperatureUnit ? 1 : 0,
-    'TimeFormat': parseInt(settings.TimeFormat) || 0,
+    'TemperatureUnit': (settings.TemperatureUnit && settings.TemperatureUnit.value) ? 1 : 0,
+    'TimeFormat': parseInt((settings.TimeFormat && settings.TimeFormat.value) || '0'),
     'ColorTheme': colorTheme,
-    'InvertColors': settings.InvertColors ? 1 : 0,
-    'ShowWeather': settings.ShowWeather ? 1 : 0,
-    'ShowBattery': settings.ShowBattery ? 1 : 0,
-    'ShowDate': settings.ShowDate ? 1 : 0,
-    'UseGPS': settings.UseGPS ? 1 : 0,
-    'ZipCode': settings.ZipCode || ''
+    'InvertColors': (settings.InvertColors && settings.InvertColors.value) ? 1 : 0,
+    'ShowWeather': (settings.ShowWeather && settings.ShowWeather.value) ? 1 : 0,
+    'ShowBattery': (settings.ShowBattery && settings.ShowBattery.value) ? 1 : 0,
+    'ShowDate': (settings.ShowDate && settings.ShowDate.value) ? 1 : 0,
+    'UseGPS': (settings.UseGPS && settings.UseGPS.value !== false) ? 1 : 0,
+    'ZipCode': (settings.ZipCode && settings.ZipCode.value) || ''
   };
+  
+  console.log('=== Sending settings to watch ===');
+  console.log('  TemperatureUnit: ' + dictionary.TemperatureUnit);
+  console.log('  TimeFormat: ' + dictionary.TimeFormat);
+  console.log('  ColorTheme: ' + dictionary.ColorTheme);
+  console.log('  InvertColors: ' + dictionary.InvertColors);
+  console.log('  ShowWeather: ' + dictionary.ShowWeather);
+  console.log('  ShowBattery: ' + dictionary.ShowBattery);
+  console.log('  ShowDate: ' + dictionary.ShowDate);
+  console.log('  UseGPS: ' + dictionary.UseGPS);
+  console.log('  ZipCode: ' + dictionary.ZipCode);
+  console.log('=================================');
   
   Pebble.sendAppMessage(dictionary,
     function() {

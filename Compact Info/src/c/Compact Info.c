@@ -58,6 +58,7 @@ static void layout_weather_section_with_icon_size(GSize icon_size);
 static void layout_battery_section_with_icon_size(GSize icon_size);
 static GBitmap *scale_bitmap_to_fit(GBitmap *source, int max_dimension);
 static GBitmap *create_scaled_icon(uint32_t resource_id, int max_dimension);
+static void update_text_colors(void);
 
 
 // Time word conversion arrays
@@ -82,6 +83,8 @@ static const char* const MINUTE_WORDS[] = {
 static void update_time() {
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "update_time: use_words=%d, is_24h=%d", s_use_words, s_is_24h);
   
   if (s_use_words) {
     // Word-based time display
@@ -436,19 +439,19 @@ static void update_battery() {
   
   if (percent == 100) {
     snprintf(s_battery_status_buffer, sizeof(s_battery_status_buffer), "Full");
-    battery_icon_id = RESOURCE_ID_ICON_BATTERY_FULL;
+    battery_icon_id = s_invert_colors ? RESOURCE_ID_ICON_BATTERY_FULL_WHITE : RESOURCE_ID_ICON_BATTERY_FULL;
   } else if (percent >= 80) {
     snprintf(s_battery_status_buffer, sizeof(s_battery_status_buffer), "Great");
-    battery_icon_id = RESOURCE_ID_ICON_BATTERY_FULL;
+    battery_icon_id = s_invert_colors ? RESOURCE_ID_ICON_BATTERY_FULL_WHITE : RESOURCE_ID_ICON_BATTERY_FULL;
   } else if (percent >= 50) {
     snprintf(s_battery_status_buffer, sizeof(s_battery_status_buffer), "Good");
-    battery_icon_id = RESOURCE_ID_ICON_BATTERY_GOOD;
+    battery_icon_id = s_invert_colors ? RESOURCE_ID_ICON_BATTERY_GOOD_WHITE : RESOURCE_ID_ICON_BATTERY_GOOD;
   } else if (percent >= 20) {
     snprintf(s_battery_status_buffer, sizeof(s_battery_status_buffer), "Low");
-    battery_icon_id = RESOURCE_ID_ICON_BATTERY_LOW;
+    battery_icon_id = s_invert_colors ? RESOURCE_ID_ICON_BATTERY_LOW_WHITE : RESOURCE_ID_ICON_BATTERY_LOW;
   } else {
     snprintf(s_battery_status_buffer, sizeof(s_battery_status_buffer), "Low");
-    battery_icon_id = RESOURCE_ID_ICON_BATTERY_WARNING;
+    battery_icon_id = s_invert_colors ? RESOURCE_ID_ICON_BATTERY_WARNING_WHITE : RESOURCE_ID_ICON_BATTERY_WARNING;
   }
   
   text_layer_set_text(s_battery_status_layer, s_battery_status_buffer);
@@ -477,6 +480,8 @@ static void battery_callback(BatteryChargeState state) {
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "=== inbox_received_callback START ===");
+  
   // Read weather data from phone
   Tuple *temp_tuple = dict_find(iterator, MESSAGE_KEY_Temperature);
   Tuple *condition_tuple = dict_find(iterator, MESSAGE_KEY_Condition);
@@ -501,14 +506,27 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     
     int icon_id = (int)icon_tuple->value->int32;
-    uint32_t resource_id = RESOURCE_ID_ICON_CLOUD; // Default
+    uint32_t resource_id;
     
-    switch(icon_id) {
-      case 0: resource_id = RESOURCE_ID_ICON_SUN; break;
-      case 1: resource_id = RESOURCE_ID_ICON_CLOUD; break;
-      case 2: resource_id = RESOURCE_ID_ICON_RAIN; break;
-      case 3: resource_id = RESOURCE_ID_ICON_SNOW; break;
-      case 4: resource_id = RESOURCE_ID_ICON_THUNDER; break;
+    // Choose icon based on weather condition and invert setting
+    if (s_invert_colors) {
+      resource_id = RESOURCE_ID_ICON_CLOUD_WHITE; // Default white
+      switch(icon_id) {
+        case 0: resource_id = RESOURCE_ID_ICON_SUN_WHITE; break;
+        case 1: resource_id = RESOURCE_ID_ICON_CLOUD_WHITE; break;
+        case 2: resource_id = RESOURCE_ID_ICON_RAIN_WHITE; break;
+        case 3: resource_id = RESOURCE_ID_ICON_SNOW_WHITE; break;
+        case 4: resource_id = RESOURCE_ID_ICON_THUNDER_WHITE; break;
+      }
+    } else {
+      resource_id = RESOURCE_ID_ICON_CLOUD; // Default black
+      switch(icon_id) {
+        case 0: resource_id = RESOURCE_ID_ICON_SUN; break;
+        case 1: resource_id = RESOURCE_ID_ICON_CLOUD; break;
+        case 2: resource_id = RESOURCE_ID_ICON_RAIN; break;
+        case 3: resource_id = RESOURCE_ID_ICON_SNOW; break;
+        case 4: resource_id = RESOURCE_ID_ICON_THUNDER; break;
+      }
     }
     
     s_weather_icon = gbitmap_create_with_resource(resource_id);
@@ -516,9 +534,12 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   }
   
   // Read settings
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "=== Reading Settings ===");
+  
   Tuple *temp_unit_tuple = dict_find(iterator, MESSAGE_KEY_TemperatureUnit);
   if (temp_unit_tuple) {
     s_use_celsius = temp_unit_tuple->value->int32 == 1;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "TemperatureUnit: %d (Celsius: %d)", (int)temp_unit_tuple->value->int32, s_use_celsius);
   }
   
   Tuple *time_format_tuple = dict_find(iterator, MESSAGE_KEY_TimeFormat);
@@ -526,12 +547,35 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     int format = (int)time_format_tuple->value->int32;
     s_use_words = (format == 0);
     s_is_24h = (format == 2);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "TimeFormat: %d (use_words: %d, is_24h: %d)", format, s_use_words, s_is_24h);
     update_time();
+  }
+  
+  // Check for InvertColors
+  Tuple *invert_colors_tuple = dict_find(iterator, MESSAGE_KEY_InvertColors);
+  if (invert_colors_tuple) {
+    s_invert_colors = invert_colors_tuple->value->int32 == 1;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "InvertColors: %d (s_invert_colors: %d)", (int)invert_colors_tuple->value->int32, s_invert_colors);
+    update_text_colors();
+    layer_mark_dirty(s_canvas_layer);
+  } else {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "InvertColors: NOT FOUND in message");
+  }
+  
+  // Check for ColorTheme
+  Tuple *color_theme_tuple = dict_find(iterator, MESSAGE_KEY_ColorTheme);
+  if (color_theme_tuple) {
+    s_color_theme = (int)color_theme_tuple->value->int32;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ColorTheme: %d", s_color_theme);
+    layer_mark_dirty(s_canvas_layer);
+  } else {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ColorTheme: NOT FOUND in message");
   }
   
   Tuple *show_weather_tuple = dict_find(iterator, MESSAGE_KEY_ShowWeather);
   if (show_weather_tuple) {
     s_show_weather = show_weather_tuple->value->int32 == 1;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ShowWeather: %d", s_show_weather);
     layer_set_hidden(bitmap_layer_get_layer(s_weather_icon_layer), !s_show_weather);
     layer_set_hidden(text_layer_get_layer(s_weather_temp_layer), !s_show_weather);
     layer_set_hidden(text_layer_get_layer(s_weather_condition_layer), !s_show_weather);
@@ -540,6 +584,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *show_battery_tuple = dict_find(iterator, MESSAGE_KEY_ShowBattery);
   if (show_battery_tuple) {
     s_show_battery = show_battery_tuple->value->int32 == 1;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ShowBattery: %d", s_show_battery);
     layer_set_hidden(bitmap_layer_get_layer(s_battery_icon_layer), !s_show_battery);
     layer_set_hidden(text_layer_get_layer(s_battery_percent_layer), !s_show_battery);
     layer_set_hidden(text_layer_get_layer(s_battery_status_layer), !s_show_battery);
@@ -548,12 +593,38 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *show_date_tuple = dict_find(iterator, MESSAGE_KEY_ShowDate);
   if (show_date_tuple) {
     s_show_date = show_date_tuple->value->int32 == 1;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ShowDate: %d", s_show_date);
     layer_set_hidden(text_layer_get_layer(s_date_layer), !s_show_date);
     if (s_show_date) update_date();
   }
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "=== inbox_received_callback END ===");
 }
 
-static void canvas_update_proc(Layer *layer, GContext *ctx) {
+static void update_text_colors(void) {
+  // Set text colors based on invert setting
+  GColor primary_text_color = s_invert_colors ? GColorWhite : GColorBlack;
+  GColor secondary_text_color = s_invert_colors ? GColorLightGray : GColorDarkGray;
+  
+  // Update all text layers
+  text_layer_set_text_color(s_time_hour_layer, primary_text_color);
+  text_layer_set_text_color(s_time_minute_layer, primary_text_color);
+  text_layer_set_text_color(s_time_period_layer, secondary_text_color);
+  text_layer_set_text_color(s_weather_temp_layer, primary_text_color);
+  text_layer_set_text_color(s_weather_condition_layer, secondary_text_color);
+  text_layer_set_text_color(s_battery_percent_layer, primary_text_color);
+  text_layer_set_text_color(s_battery_status_layer, secondary_text_color);
+  text_layer_set_text_color(s_date_layer, secondary_text_color);
+  
+  // Reload icons with correct color version
+  update_battery();
+  
+  // Force weather icon refresh by requesting new weather data
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_uint8(iter, MESSAGE_KEY_Temperature, 1);
+  app_message_outbox_send();
+}static void canvas_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   
   // Set colors based on theme and invert setting
@@ -696,6 +767,9 @@ static void main_window_load(Window *window) {
   text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
   
+  // Ensure text/icon colors respect current invert setting at startup
+  update_text_colors();
+
   // Initialize displays
   update_time();
   update_date();

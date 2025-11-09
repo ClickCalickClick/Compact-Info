@@ -47,8 +47,18 @@
         },
         {
           "type": "png",
+          "name": "ICON_SUN_WHITE",
+          "file": "sun-white.png"
+        },
+        {
+          "type": "png",
           "name": "ICON_CLOUD",
           "file": "cloud.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_CLOUD_WHITE",
+          "file": "cloud-white.png"
         },
         {
           "type": "png",
@@ -57,8 +67,18 @@
         },
         {
           "type": "png",
+          "name": "ICON_RAIN_WHITE",
+          "file": "cloud-rain-white.png"
+        },
+        {
+          "type": "png",
           "name": "ICON_SNOW",
           "file": "cloud-snow.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_SNOW_WHITE",
+          "file": "cloud-snow-white.png"
         },
         {
           "type": "png",
@@ -67,8 +87,18 @@
         },
         {
           "type": "png",
+          "name": "ICON_THUNDER_WHITE",
+          "file": "cloud-lightning-white.png"
+        },
+        {
+          "type": "png",
           "name": "ICON_BATTERY_FULL",
           "file": "battery-full.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_BATTERY_FULL_WHITE",
+          "file": "battery-full-white.png"
         },
         {
           "type": "png",
@@ -77,8 +107,18 @@
         },
         {
           "type": "png",
+          "name": "ICON_BATTERY_GOOD_WHITE",
+          "file": "battery-medium-white.png"
+        },
+        {
+          "type": "png",
           "name": "ICON_BATTERY_LOW",
           "file": "battery-low.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_BATTERY_LOW_WHITE",
+          "file": "battery-low-white.png"
         },
         {
           "type": "png",
@@ -87,8 +127,18 @@
         },
         {
           "type": "png",
+          "name": "ICON_BATTERY_WARNING_WHITE",
+          "file": "battery-warning-white.png"
+        },
+        {
+          "type": "png",
           "name": "ICON_BATTERY",
           "file": "battery.png"
+        },
+        {
+          "type": "png",
+          "name": "ICON_BATTERY_WHITE",
+          "file": "battery-white.png"
         }
       ]
     }
