@@ -647,15 +647,15 @@ static void main_window_load(Window *window) {
   layer_add_child(window_layer, bitmap_layer_get_layer(s_weather_icon_layer));
   
   s_weather_condition_layer = text_layer_create(GRect(content_x + icon_base + scale(5), weather_y - scale(2), 
-                                                       scale(60), scale(18)));
+                                                       scale(80), scale(20)));
   text_layer_set_background_color(s_weather_condition_layer, GColorClear);
   text_layer_set_text_color(s_weather_condition_layer, GColorDarkGray);
   text_layer_set_font(s_weather_condition_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_text(s_weather_condition_layer, "Loading...");
   layer_add_child(window_layer, text_layer_get_layer(s_weather_condition_layer));
   
-  s_weather_temp_layer = text_layer_create(GRect(content_x + icon_base + scale(68), weather_y - scale(2), 
-                                                  scale(40), scale(18)));
+  s_weather_temp_layer = text_layer_create(GRect(bounds.size.w - scale(45), weather_y - scale(2), 
+                                                  scale(40), scale(20)));
   text_layer_set_background_color(s_weather_temp_layer, GColorClear);
   text_layer_set_text_color(s_weather_temp_layer, GColorBlack);
   text_layer_set_font(s_weather_temp_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
@@ -672,14 +672,14 @@ static void main_window_load(Window *window) {
   layer_add_child(window_layer, bitmap_layer_get_layer(s_battery_icon_layer));
   
   s_battery_status_layer = text_layer_create(GRect(content_x + icon_base + scale(5), battery_y - scale(2), 
-                                                    scale(60), scale(18)));
+                                                    scale(80), scale(20)));
   text_layer_set_background_color(s_battery_status_layer, GColorClear);
   text_layer_set_text_color(s_battery_status_layer, GColorDarkGray);
   text_layer_set_font(s_battery_status_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   layer_add_child(window_layer, text_layer_get_layer(s_battery_status_layer));
   
-  s_battery_percent_layer = text_layer_create(GRect(content_x + icon_base + scale(68), battery_y - scale(2), 
-                                                     scale(40), scale(18)));
+  s_battery_percent_layer = text_layer_create(GRect(bounds.size.w - scale(45), battery_y - scale(2), 
+                                                     scale(40), scale(20)));
   text_layer_set_background_color(s_battery_percent_layer, GColorClear);
   text_layer_set_text_color(s_battery_percent_layer, GColorBlack);
   text_layer_set_font(s_battery_percent_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
