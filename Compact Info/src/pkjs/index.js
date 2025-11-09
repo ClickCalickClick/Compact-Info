@@ -1,5 +1,7 @@
-// Simple configuration without Clay library - settings handled by Pebble app
+// Clay configuration - handles settings UI automatically
+var Clay = require('pebble-clay');
 var clayConfig = require('./config');
+var clay = new Clay(clayConfig);
 
 var WEATHER_API_KEY = '680df99f9c264bde83a142148250811';
 var WEATHER_API_URL = 'http://api.weatherapi.com/v1/current.json';

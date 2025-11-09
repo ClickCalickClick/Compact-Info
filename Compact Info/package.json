@@ -6,7 +6,9 @@
     "pebble-app"
   ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
   "pebble": {
     "displayName": "Compact Info",
     "uuid": "c8ecbcf9-2193-4149-96d7-917569cbd1f0",
@@ -16,8 +18,7 @@
       "aplite",
       "basalt",
       "diorite",
-      "emery",
-      "flint"
+      "emery"
     ],
     "watchapp": {
       "watchface": true
